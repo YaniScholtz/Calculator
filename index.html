@@ -5,6 +5,75 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculator web applicatoin</title>
     <link rel="stylesheet" href="style.css">
+    <script>
+        function operate(a, b, operator) {
+            a = parseFloat(a);
+            b = parseFloat(b);
+            switch (operator) {
+                case '+':
+                    return a + b;
+                case '-':
+                    return a - b;
+                case '*':
+                    return a * b;
+                case '/':
+                    return a / b;
+                default:
+                    return 0;
+            }
+        }
+
+
+
+
+        function evaluateExpression(expression) {
+
+
+            const tokens = expression.split(/([+\-*/])/).filter(token => token !== '');
+            const numberStack = [];
+            const operatorStack = [];
+
+
+            let i = 0;
+            while (i < tokens.length) {
+                const token = tokens[i];
+                if (token === '*' || token === '/') {
+                    const operator = token;
+                    const operand = tokens[i + 1];
+                    const leftOperand = numberStack.pop();
+                    const result = operate(leftOperand, operand, operator);
+                    numberStack.push(result);
+                    i += 2;
+                } else {
+                    numberStack.push(token);
+                    i++;
+                }
+            }
+
+
+            let result = parseFloat(numberStack[0]);
+            for (let j = 1; j < numberStack.length; j += 2) {
+                const operator = numberStack[j];
+                const operand = parseFloat(numberStack[j + 1]);
+                result = operate(result, operand, operator);
+            }
+
+            return result;
+        }
+
+        function handleInput(input, display) {
+            if (input === "=") {
+                display.value = evaluateExpression(display.value);
+            } else if (input === "AC") {
+                display.value = "";
+            } else if (input === "DE") {
+                display.value = display.value.toString().slice(0, -1);
+            } else {
+                display.value += input;
+            }
+        }
+
+    </script>
 </head>
 
 <body>
@@ -15,39 +84,38 @@
                     <input type="text" name="display">
                 </div>
                 <div>
-                    <input type="button" value="AC" onclick="display.value = ''" class="operator">
-                    <input type=" button" value="DE" onclick="display.value = display.value.toString().slice(0,-1)"
-                        class="operator">
-                    <input type="button" value="." onclick="display.value += '.'" class="operator">
-                    <input type=" button" value="/" onclick="display.value += '/'" class="operator">
+                    <input type="button" value="AC" onclick="handleInput('AC',display)" class="operator">
+                    <input type=" button" value="DE" onclick="handleInput('DE',display)" class="operator">
+                    <input type="button" value="." onclick="handleInput('.',display)" class="operator">
+                    <input type=" button" value="/" onclick="handleInput('/',display)" class="operator">
 
                 </div>
                 <div>
-                    <input type=" button" value="7" onclick="display.value += '7' ">
-                    <input type="button" value="8" onclick="display.value += '8' ">
-                    <input type="button" value="9" onclick="display.value += '9' ">
-                    <input type="button" value="*" onclick="display.value += '*' " class="operator">
+                    <input type=" button" value="7" onclick="handleInput('7',display) ">
+                    <input type="button" value="8" onclick="handleInput('8',display) ">
+                    <input type="button" value="9" onclick="handleInput('9',display) ">
+                    <input type="button" value="*" onclick="handleInput('*',display) " class="operator">
 
                 </div>
                 <div>
-                    <input type="button" value="4" onclick="display.value += '4' ">
-                    <input type="button" value="5" onclick="display.value += '5' ">
-                    <input type="button" value="6" onclick="display.value += '6' ">
-                    <input type="button" value="-" onclick="display.value += '-' " class="operator">
+                    <input type="button" value="4" onclick="handleInput('4',display) ">
+                    <input type="button" value="5" onclick="handleInput('5',display)">
+                    <input type="button" value="6" onclick="handleInput('6',display) ">
+                    <input type="button" value="-" onclick="handleInput('-',display) " class="operator">
 
                 </div>
                 <div>
-                    <input type="button" value="1" onclick="display.value += '1' ">
-                    <input type="button" value="2" onclick="display.value += '2' ">
-                    <input type="button" value="3" onclick="display.value += '3' ">
-                    <input type="button" value="+" onclick="display.value += '+' " class="operator">
+                    <input type="button" value="1" onclick="handleInput('1',display)">
+                    <input type="button" value="2" onclick="handleInput('2',display) ">
+                    <input type="button" value="3" onclick="handleInput('3',display) ">
+                    <input type="button" value="+" onclick="handleInput('+',display) " class="operator">
 
                 </div>
 
                 <div>
-                    <input type="button" value="00" onclick="display.value += '00' ">
-                    <input type="button" value="0" onclick="display.value += '0' ">
-                    <input type="button" value="=" onclick="display.value = eval(display.value)" class="equal operator">
+                    <input type="button" value="00" onclick="handleInput('00',display)">
+                    <input type="button" value="0" onclick="handleInput('0',display)">
+                    <input type="button" value="=" onclick="handleInput('=',display)" class="equal operator">
 
                 </div>
             </form>
