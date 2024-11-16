@@ -1,43 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculator web applicatoin</title>
+    <title>Scientific Calculator</title>
     <link rel="stylesheet" href="style.css">
     <script>
-        function operate(a, b, operator) {
-            a = parseFloat(a);
-            b = parseFloat(b);
-            switch (operator) {
-                case '+':
-                    return a + b;
-                case '-':
-                    return a - b;
-                case '*':
-                    return a * b;
-                case '/':
-                    return a / b;
-                default:
-                    return 0;
-            }
-        }
-
-
-
-
         function evaluateExpression(expression) {
+            // Handle functions like sqrt(4), sin(30), cos(45), etc.
+            let match;
 
+            // Regular expression to match sqrt, sin, cos, tan, log, exp with their parentheses
+            const functionRegex = /([a-zA-Z]+)\(([^)]+)\)/g;
 
-            const tokens = expression.split(/([+\-*/])/).filter(token => token !== '');
+            // Handle functions like sqrt, sin, cos, etc.
+            while (match = functionRegex.exec(expression)) {
+                const funcName = match[1];  // The function name like sqrt, sin, etc.
+                const insideParentheses = match[2];  // The content inside the parentheses
+
+                let result;
+                switch (funcName) {
+                    case 'sqrt':
+                        result = Math.sqrt(parseFloat(insideParentheses));
+                        break;
+                    case 'sin':
+                        result = Math.sin(parseFloat(insideParentheses) * Math.PI / 180);  // Convert degrees to radians
+                        break;
+                    case 'cos':
+                        result = Math.cos(parseFloat(insideParentheses) * Math.PI / 180);  // Convert degrees to radians
+                        break;
+                    case 'tan':
+                        result = Math.tan(parseFloat(insideParentheses) * Math.PI / 180);  // Convert degrees to radians
+                        break;
+                    case 'log':
+                        result = Math.log10(parseFloat(insideParentheses));  // Base-10 logarithm
+                        break;
+                    case 'exp':
+                        result = Math.exp(parseFloat(insideParentheses));  // Exponential
+                        break;
+                    default:
+                        result = 0;
+                        break;
+                }
+
+                // Replace the function call with its result (as a string)
+                expression = expression.replace(match[0], result.toString());
+            }
+
+            // Now handle basic arithmetic operations ( +, -, *, /, ^ )
+            const tokens = expression.split(/([+\-*/^])/).filter(token => token !== '');
             const numberStack = [];
-            const operatorStack = [];
-
-
             let i = 0;
             while (i < tokens.length) {
                 const token = tokens[i];
-                if (token === '*' || token === '/') {
+                if (token === '*' || token === '/' || token === '^') {
                     const operator = token;
                     const operand = tokens[i + 1];
                     const leftOperand = numberStack.pop();
@@ -50,7 +66,6 @@
                 }
             }
 
-
             let result = parseFloat(numberStack[0]);
             for (let j = 1; j < numberStack.length; j += 2) {
                 const operator = numberStack[j];
@@ -59,6 +74,25 @@
             }
 
             return result;
+        }
+
+        function operate(a, b, operator) {
+            a = parseFloat(a);
+            b = parseFloat(b);
+            switch (operator) {
+                case '+':
+                    return a + b;
+                case '-':
+                    return a - b;
+                case '*':
+                    return a * b;
+                case '/':
+                    return a / b;
+                case '^':
+                    return Math.pow(a, b);
+                default:
+                    return 0;
+            }
         }
 
         function handleInput(input, display) {
@@ -72,7 +106,6 @@
                 display.value += input;
             }
         }
-
     </script>
 </head>
 
@@ -85,41 +118,52 @@
                 </div>
                 <div>
                     <input type="button" value="AC" onclick="handleInput('AC',display)" class="operator">
-                    <input type=" button" value="DE" onclick="handleInput('DE',display)" class="operator">
+                    <input type="button" value="DE" onclick="handleInput('DE',display)" class="operator">
                     <input type="button" value="." onclick="handleInput('.',display)" class="operator">
-                    <input type=" button" value="/" onclick="handleInput('/',display)" class="operator">
-
+                    <input type="button" value="/" onclick="handleInput('/',display)" class="operator">
                 </div>
                 <div>
-                    <input type=" button" value="7" onclick="handleInput('7',display) ">
-                    <input type="button" value="8" onclick="handleInput('8',display) ">
-                    <input type="button" value="9" onclick="handleInput('9',display) ">
-                    <input type="button" value="*" onclick="handleInput('*',display) " class="operator">
-
+                    <input type="button" value="7" onclick="handleInput('7',display)">
+                    <input type="button" value="8" onclick="handleInput('8',display)">
+                    <input type="button" value="9" onclick="handleInput('9',display)">
+                    <input type="button" value="*" onclick="handleInput('*',display)" class="operator">
                 </div>
                 <div>
-                    <input type="button" value="4" onclick="handleInput('4',display) ">
+                    <input type="button" value="4" onclick="handleInput('4',display)">
                     <input type="button" value="5" onclick="handleInput('5',display)">
-                    <input type="button" value="6" onclick="handleInput('6',display) ">
-                    <input type="button" value="-" onclick="handleInput('-',display) " class="operator">
-
+                    <input type="button" value="6" onclick="handleInput('6',display)">
+                    <input type="button" value="-" onclick="handleInput('-',display)" class="operator">
                 </div>
                 <div>
                     <input type="button" value="1" onclick="handleInput('1',display)">
-                    <input type="button" value="2" onclick="handleInput('2',display) ">
-                    <input type="button" value="3" onclick="handleInput('3',display) ">
-                    <input type="button" value="+" onclick="handleInput('+',display) " class="operator">
+                    <input type="button" value="2" onclick="handleInput('2',display)">
+                    <input type="button" value="3" onclick="handleInput('3',display)">
+                    <input type="button" value="+" onclick="handleInput('+',display)" class="operator">
+                </div>
+                <div>
+                    <input type="button" value="0" onclick="handleInput('00',display)">
+                    <input type="button" value="sqrt(" onclick="handleInput('sqrt(',display)">
+                    <input type="button" value="sin(" onclick="handleInput('sin(',display)">
+                    <input type="button" value="cos(" onclick="handleInput('cos(',display)">
 
                 </div>
 
+                <!-- Scientific Buttons -->
                 <div>
-                    <input type="button" value="00" onclick="handleInput('00',display)">
-                    <input type="button" value="0" onclick="handleInput('0',display)">
+
+                    <input type="button" value="tan(" onclick="handleInput('tan(',display)">
+                    <input type="button" value="log(" onclick="handleInput('log(',display)">
+                    <input type="button" value="exp(" onclick="handleInput('exp(',display)">
+                    <input type="button" value="^" onclick="handleInput('^',display)" class="operator">
+                </div>
+                <div>
+                    <input type="button" value=")" onclick="handleInput(')', display)" class="operator">
+
                     <input type="button" value="=" onclick="handleInput('=',display)" class="equal operator">
+
 
                 </div>
             </form>
-
         </div>
     </div>
 </body>
