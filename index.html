@@ -6,7 +6,7 @@
     <title>Scientific Calculator</title>
     <link rel="stylesheet" href="style.css">
     <script>
-        function evaluateExpression(expression) {
+        function evaluate(expression) {
             /*Declaring a variable to see if it matches with other values */
             let match;
 
@@ -14,29 +14,29 @@
             const functionRegex = /([a-zA-Z]+)\(([^)]+)\)/g;
 
             while (match = functionRegex.exec(expression)) {
-                const funcName = match[1]; /*Name is given in the first item*/
-                const insideParentheses = match[2]; /*Value inside for example the 25 in sin*/
+                const functionName = match[1]; /*Name is given in the first item*/ /*Match[0] is both*/
+                const Number = match[2]; /*Value inside for example the 25 in sin*/
 
                 let result; /*Store the result from the arithemic you will do*/
-                switch (funcName) {
+                switch (functionName) {
                     case 'sqrt':
                         /*Convers to a number to do the calculation*/
-                        result = Math.sqrt(parseFloat(insideParentheses));
+                        result = Math.sqrt(parseFloat(Number));
                         break;
                     case 'sin':
-                        result = Math.sin(parseFloat(insideParentheses));
+                        result = Math.sin(parseFloat(Number));
                         break;
                     case 'cos':
-                        result = Math.cos(parseFloat(insideParentheses));
+                        result = Math.cos(parseFloat(Number));
                         break;
                     case 'tan':
-                        result = Math.tan(parseFloat(insideParentheses));
+                        result = Math.tan(parseFloat(Number));
                         break;
                     case 'log':
-                        result = Math.log10(parseFloat(insideParentheses));
+                        result = Math.log10(parseFloat(Number));
                         break;
                     case 'exp':
-                        result = Math.exp(parseFloat(insideParentheses));
+                        result = Math.exp(parseFloat(Number));
                         break;
                     default:
                         result = 0;
@@ -51,45 +51,45 @@
             }
 
             /*Here you split the expression so that you can match if it is a +, - or what type of operator it is*/
-            const tokens = expression.split(/([+\-*/^])/).filter(token => token !== '');
-            const numberStack = [];
+            const split_Values = expression.split(/([+\-*/^])/).filter(single_value => single_value !== '');
+            const numbers_operator = [];
             let i = 0;
             /*Iterate through all of the tojens in the array*/
-            while (i < tokens.length) {
-                const token = tokens[i];
+            while (i < split_Values.length) {
+                const single_value = split_Values[i];
                 /*First do this since it must be worked with before the + and -*/
-                if (token === '*' || token === '/' || token === '^') {
-                    const operator = token;
-                    const operand = tokens[i + 1];
+                if (single_value === '*' || single_value === '/' || single_value === '^') {
+                    const operator = single_value;
+                    const RightValue = split_Values[i + 1];
                     /*Get the left hand operand of the calculation*/
-                    const leftOperand = numberStack.pop();
-                    /*Call operate function to work out the sum*/
-                    const result = operate(leftOperand, operand, operator);
+                    const leftValue = numbers_operator.pop();
+                    /*Call calc_val function to work out the sum*/
+                    const result = calc_val(leftValue, RightValue, operator);
                     /*Push the result back onto the stack so that if there are any more 
                     expressions that it can be used*/
-                    numberStack.push(result);
+                    numbers_operator.push(result);
                     /*Plus two because it only works with two numbers at a time*/
                     i += 2;
                 } else {
-                    numberStack.push(token);
+                    numbers_operator.push(single_value);
                     i++;
                 }
             }
-            /*Values in numberStack is still stored as strings so you must
+            /*Values in numbers_operator is still stored as strings so you must
             change it to integers first*/
 
-            let result = parseFloat(numberStack[0]);
+            let result = parseFloat(numbers_operator[0]);
             /*j+=2 because the even indices are numbers and the odd is operators*/
-            for (let j = 1; j < numberStack.length; j += 2) {
-                const operator = numberStack[j];
-                const operand = parseFloat(numberStack[j + 1]);
-                result = operate(result, operand, operator);
+            for (let j = 1; j < numbers_operator.length; j += 2) {
+                const operator = numbers_operator[j];
+                const RightValue = parseFloat(numbers_operator[j + 1]);
+                result = calc_val(result, RightValue, operator);
             }
 
             return result;
         }
 
-        function operate(a, b, operator) {
+        function calc_val(a, b, operator) {
             a = parseFloat(a);
             b = parseFloat(b);
             switch (operator) {
@@ -110,7 +110,7 @@
 
         function handleInput(input, display) {
             if (input === "=") {
-                display.value = evaluateExpression(display.value);
+                display.value = evaluate(display.value);
             } else if (input === "AC") {
                 display.value = "";
             } else if (input === "DE") {
