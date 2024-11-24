@@ -7,16 +7,14 @@
     <link rel="stylesheet" href="style.css">
     <script>
         function evaluateExpression(expression) {
-            // Handle functions like sqrt(4), sin(30), cos(45), etc.
             let match;
 
-            // Regular expression to match sqrt, sin, cos, tan, log, exp with their parentheses
+
             const functionRegex = /([a-zA-Z]+)\(([^)]+)\)/g;
 
-            // Handle functions like sqrt, sin, cos, etc.
             while (match = functionRegex.exec(expression)) {
-                const funcName = match[1];  // The function name like sqrt, sin, etc.
-                const insideParentheses = match[2];  // The content inside the parentheses
+                const funcName = match[1];
+                const insideParentheses = match[2];
 
                 let result;
                 switch (funcName) {
@@ -33,21 +31,21 @@
                         result = Math.tan(parseFloat(insideParentheses) * Math.PI / 180);  // Convert degrees to radians
                         break;
                     case 'log':
-                        result = Math.log10(parseFloat(insideParentheses));  // Base-10 logarithm
+                        result = Math.log10(parseFloat(insideParentheses));
                         break;
                     case 'exp':
-                        result = Math.exp(parseFloat(insideParentheses));  // Exponential
+                        result = Math.exp(parseFloat(insideParentheses));
                         break;
                     default:
                         result = 0;
                         break;
                 }
 
-                // Replace the function call with its result (as a string)
+
                 expression = expression.replace(match[0], result.toString());
             }
 
-            // Now handle basic arithmetic operations ( +, -, *, /, ^ )
+
             const tokens = expression.split(/([+\-*/^])/).filter(token => token !== '');
             const numberStack = [];
             let i = 0;
