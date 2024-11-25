@@ -5,7 +5,154 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scientific Calculator</title>
     <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
+    <script>
+        function evaluate(expression) {
+            /* Declaring a variable to see if it matches with other values */
+            let match;
+            expression = expression.replace(/\be\b/g, Math.E.toString());
+
+            /* The functions that match must match with. a-z is for the function name like sin or cos and the ^ + is the argument inside */
+            const functionRegex = /([a-zA-Z]+)\(([^()]+)\)/g;
+
+            /* Evaluate functions like sin, cos, sqrt, etc. first */
+            while ((match = functionRegex.exec(expression))) {
+                const functionName = match[1]; /* Name is given in the first item */
+                const Number = match[2]; /* Value inside for example the 25 in sin */
+
+                let result; /* Store the result from the arithmetic you will do */
+                switch (functionName) {
+                    case 'sqrt':
+                        /* Converts to a number to do the calculation */
+                        result = Math.sqrt(parseFloat(Number));
+                        break;
+                    case 'sin':
+                        result = Math.sin(parseFloat(Number)); // Convert degrees to radians
+                        break;
+                    case 'cos':
+                        result = Math.cos(parseFloat(Number)); // Convert degrees to radians
+                        break;
+                    case 'tan':
+                        result = Math.tan(parseFloat(Number)); // Convert degrees to radians
+                        break;
+                    case 'log':
+                        result = Math.log10(parseFloat(Number));
+                        break;
+                    case 'exp':
+                        result = Math.exp(parseFloat(Number));
+                        break;
+                    default:
+                        result = 0;
+                        break;
+                }
+
+                expression = expression.replace(match[0], result.toString());
+                /* Replaces the expression like sin(180) with -1 as a string.
+                   This ensures functions are evaluated first and won't interfere
+                   with subsequent bracket handling for arithmetic. */
+            }
+
+            /* Evaluate inner-most brackets for arithmetic after functions */
+            while (expression.includes('(')) {
+                expression = expression.replace(/\(([^()]+)\)/g, (_, inner) => evaluate(inner));
+                /* Finds the innermost bracketed expression, evaluates it recursively,
+                   and replaces it with its computed value */
+            }
+
+            /* Surround operators with spaces to ensure proper tokenization */
+            expression = expression.replace(/([+\-*/^()])/g, " $1 ").trim();
+
+            /* Tokenize the expression into a list of numbers and operators */
+            const tokens = expression.split(/\s+/);
+
+            /* Process tokens to handle negative numbers */
+            const processedTokens = [];
+            for (let i = 0; i < tokens.length; i++) {
+                const token = tokens[i];
+                /* If a '-' is found at the start or after an operator, treat it as a negative number */
+                if (token === "-" && (i === 0 || ["+", "-", "*", "/", "^", "("].includes(tokens[i - 1]))) {
+                    processedTokens.push(token + tokens[++i]); /* Combine '-' with the next token */
+                } else {
+                    processedTokens.push(token);
+                }
+            }
+
+            /* Split the expression so that you can match if it is a +, - or what type of operator it is */
+            const numbers_operator = [];
+            let i = 0;
+            /* Iterate through all of the tokens in the array */
+            while (i < processedTokens.length) {
+                const single_value = processedTokens[i];
+                /* First do this since it must be worked with before the + and - */
+                if (single_value === '*' || single_value === '/' || single_value === '^') {
+                    const operator = single_value;
+                    const RightValue = processedTokens[++i];
+                    /* Get the left-hand operand of the calculation */
+                    const leftValue = numbers_operator.pop();
+                    /* Call calc_val function to work out the sum */
+                    const result = calc_val(leftValue, RightValue, operator);
+                    /* Push the result back onto the stack so that if there are any more
+                       expressions, it can be used */
+                    numbers_operator.push(result);
+                    /* Plus two because it only works with two numbers at a time */
+                    i++;
+                } else {
+                    numbers_operator.push(single_value);
+                    i++;
+                }
+            }
+
+            /* Values in numbers_operator are still stored as strings so you must
+               change them to integers first */
+            let result = parseFloat(numbers_operator[0]);
+            /* j+=2 because the even indices are numbers and the odd ones are operators */
+            for (let j = 1; j < numbers_operator.length; j += 2) {
+                const operator = numbers_operator[j];
+                const RightValue = parseFloat(numbers_operator[j + 1]);
+                result = calc_val(result, RightValue, operator);
+            }
+
+            return result;
+        }
+
+
+
+        function calc_val(a, b, operator) {
+            a = parseFloat(a);
+            b = parseFloat(b);
+            switch (operator) {
+                case '+':
+                    return a + b;
+                case '-':
+                    return a - b;
+                case '*':
+                    return a * b;
+                case '/':
+                    return a / b;
+                case '^':
+                    return Math.pow(a, b);
+                default:
+                    return 0;
+            }
+        }
+
+        function handleInput(input, display) {
+            let currentValue = display.value;
+
+            // Handle negative number input by checking the current value
+            if (input === "-" && (currentValue === "" || /[+\-*/^(]$/.test(currentValue))) {
+                // If it's at the beginning or after an operator, treat as a negative number
+                display.value += input;
+            } else if (input === "=") {
+                display.value = evaluate(display.value);
+            } else if (input === "AC") {
+                display.value = "";
+            } else if (input === "DE") {
+                display.value = currentValue.slice(0, -1);
+            } else {
+                display.value += input;
+            }
+        }
+    </script>
 </head>
 
 <body>
@@ -13,49 +160,57 @@
         <div class="calculator">
             <form>
                 <div class="display">
-                    <input type="text" name="display" id="display">
+                    <input type="text" name="display">
                 </div>
                 <div>
-                    <input type="button" value="AC" onclick="handleInput('AC')" class="operator">
-                    <input type="button" value="DE" onclick="handleInput('DE')" class="operator">
-                    <input type="button" value="." onclick="handleInput('.')">
-                    <input type="button" value="/" onclick="handleInput('/')">
+                    <input type="button" value="AC" onclick="handleInput('AC',display)" class="operator">
+                    <input type="button" value="DE" onclick="handleInput('DE',display)" class="operator">
+                    <input type="button" value="." onclick="handleInput('.',display)" class="operator">
+                    <input type="button" value="/" onclick="handleInput('/',display)" class="operator">
                 </div>
                 <div>
-                    <input type="button" value="7" onclick="handleInput('7')">
-                    <input type="button" value="8" onclick="handleInput('8')">
-                    <input type="button" value="9" onclick="handleInput('9')">
-                    <input type="button" value="*" onclick="handleInput('*')">
+                    <input type="button" value="7" onclick="handleInput('7',display)">
+                    <input type="button" value="8" onclick="handleInput('8',display)">
+                    <input type="button" value="9" onclick="handleInput('9',display)">
+                    <input type="button" value="*" onclick="handleInput('*',display)" class="operator">
                 </div>
                 <div>
-                    <input type="button" value="4" onclick="handleInput('4')">
-                    <input type="button" value="5" onclick="handleInput('5')">
-                    <input type="button" value="6" onclick="handleInput('6')">
-                    <input type="button" value="-" onclick="handleInput('-')">
+                    <input type="button" value="4" onclick="handleInput('4',display)">
+                    <input type="button" value="5" onclick="handleInput('5',display)">
+                    <input type="button" value="6" onclick="handleInput('6',display)">
+                    <input type="button" value="-" onclick="handleInput('-',display)" class="operator">
                 </div>
                 <div>
-                    <input type="button" value="1" onclick="handleInput('1')">
-                    <input type="button" value="2" onclick="handleInput('2')">
-                    <input type="button" value="3" onclick="handleInput('3')">
-                    <input type="button" value="+" onclick="handleInput('+')">
+                    <input type="button" value="1" onclick="handleInput('1',display)">
+                    <input type="button" value="2" onclick="handleInput('2',display)">
+                    <input type="button" value="3" onclick="handleInput('3',display)">
+                    <input type="button" value="+" onclick="handleInput('+',display)" class="operator">
                 </div>
                 <div>
-                    <input type="button" value="0" onclick="handleInput('0')">
-                    <input type="button" value="sqrt" onclick="handleInput('sqrt(')">
-                    <input type="button" value="sin" onclick="handleInput('sin(')">
-                    <input type="button" value="cos" onclick="handleInput('cos(')">
+                    <input type="button" value="0" onclick="handleInput('0',display)">
+                    <input type="button" value="sqrt" onclick="handleInput('sqrt(',display)">
+                    <input type="button" value="sin" onclick="handleInput('sin(',display)">
+                    <input type="button" value="cos" onclick="handleInput('cos(',display)">
+
+                </div>
+
+                <!-- Scientific Buttons -->
+                <div>
+
+                    <input type="button" value="tan" onclick="handleInput('tan(',display)">
+                    <input type="button" value="log" onclick="handleInput('log(',display)">
+                    <input type="button" value="exp" onclick="handleInput('exp(',display)">
+                    <input type="button" value="^" onclick="handleInput('^',display)" class="operator">
                 </div>
                 <div>
-                    <input type="button" value="tan" onclick="handleInput('tan(')">
-                    <input type="button" value="log" onclick="handleInput('log(')">
-                    <input type="button" value="exp" onclick="handleInput('exp(')">
-                    <input type="button" value="^" onclick="handleInput('^')">
-                    <input type="button" value="e" onclick="handleInput('e')" />
-                </div>
-                <div>
-                    <input type="button" value="(" onclick="handleInput('(')">
-                    <input type="button" value=")" onclick="handleInput(')')">
-                    <input type="button" value="=" onclick="handleInput('=')" class="equal operator">
+                    <div>
+                        <!-- Add separate buttons for "(" and ")" -->
+                        <input type="button" value="e" onclick="handleInput('e', display)">
+                        <input type="button" value="(" onclick="handleInput('(', display)" class="operator">
+                        <input type="button" value=")" onclick="handleInput(')', display)" class="operator">
+                        <input type="button" value="=" onclick="handleInput('=', display)" class="equal operator">
+                    </div>
+
                 </div>
             </form>
         </div>
