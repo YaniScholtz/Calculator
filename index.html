@@ -9,6 +9,7 @@
         function evaluate(expression) {
             /* Declaring a variable to see if it matches with other values */
             let match;
+            /*When e only exists on its own and not in a exp*/
             expression = expression.replace(/\be\b/g, Math.E.toString());
 
             /* The functions that match must match with. a-z is for the function name like sin or cos and the ^ + is the argument inside */
@@ -26,13 +27,13 @@
                         result = Math.sqrt(parseFloat(Number));
                         break;
                     case 'sin':
-                        result = Math.sin(parseFloat(Number)); // Convert degrees to radians
+                        result = Math.sin(parseFloat(Number));
                         break;
                     case 'cos':
-                        result = Math.cos(parseFloat(Number)); // Convert degrees to radians
+                        result = Math.cos(parseFloat(Number));
                         break;
                     case 'tan':
-                        result = Math.tan(parseFloat(Number)); // Convert degrees to radians
+                        result = Math.tan(parseFloat(Number));
                         break;
                     case 'log':
                         result = Math.log10(parseFloat(Number));
@@ -58,7 +59,7 @@
                    and replaces it with its computed value */
             }
 
-            /* Surround operators with spaces to ensure proper tokenization */
+            /* Surround operators with spaces to separate them so that parsing is easier */
             expression = expression.replace(/([+\-*/^()])/g, " $1 ").trim();
 
             /* Tokenize the expression into a list of numbers and operators */
